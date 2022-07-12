@@ -1,0 +1,33 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-clipboardonline-dev-43556-authRole",
+      "UnauthRoleArn": "arn:aws:iam::785668202743:role/amplify-clipboardonline-dev-43556-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::785668202743:role/amplify-clipboardonline-dev-43556-authRole",
+      "Region": "eu-central-1",
+      "DeploymentBucketName": "amplify-clipboardonline-dev-43556-deployment",
+      "UnauthRoleName": "amplify-clipboardonline-dev-43556-unauthRole",
+      "StackName": "amplify-clipboardonline-dev-43556",
+      "StackId": "arn:aws:cloudformation:eu-central-1:785668202743:stack/amplify-clipboardonline-dev-43556/a9bfbf60-f682-11ec-bef2-0a9003a8acd0",
+      "AmplifyAppId": "dyuyotmi8zn96"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "dyuyotmi8zn96",
+          "type": "manual"
+        }
+      },
+      "function": {
+        "CopyPasteTextContentDatasourceAdapter": {
+          "deploymentBucketName": "amplify-clipboardonline-dev-43556-deployment",
+          "s3Key": "amplify-builds/CopyPasteTextContentDatasourceAdapter-643043366f7032395a53-build.zip",
+          "foo": "BAR",
+          "reactAppVapidSubject": "mailto: <denis.talochkin@gmail.com>",
+          "reactAppVapidPublicKey": "***REMOVED***",
+          "reactAppVapidPrivateKey": "***REMOVED***"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+# This "input" configures a global authorization rule to enable public access to
+# all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
+#input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONLY!
+
+type WebPushSubscription @model @auth(rules: [{ allow: public, provider: apiKey }]) {
+  id: ID!
+  subscription: String! @index(name: "subscriptionOnTextContent-index", queryField: "subscriptionOnTextContent")
+  secret: String!
+}
+
+
+type CopyPasteTextContent {
+  id: ID!
+  secret: String!
+  body: String!
+  publishedAt: AWSDateTime!
+}
+
+type CopyFileContent {
+  fileContent: String!
+  fileName: String!
+  id: ID!
+  secret: String!
+}
+
+schema {
+  mutation: Mutation
+  subscription: Subscription
+  query: Query
+}
+
+type Query {
+  allContent: [CopyPasteTextContent] @function(name: "CopyPasteTextContentDatasourceAdapter-${env}")
+}
+
+type Mutation {
+  sendCopyPasteTextContent(secret: String!, data: String!): CopyPasteTextContent @function(name: "CopyPasteTextContentDatasourceAdapter-${env}")
+  sendCopyFileContent(fileContent: String!, fileName: String!, secret: String!): CopyFileContent @function(name: "CopyPasteTextContentDatasourceAdapter-${env}")
+}
+
+type Subscription {
+  subscribeToCopyPasteTextContent(secret: String!): CopyPasteTextContent
+  @aws_subscribe(mutations: ["sendCopyPasteTextContent"])
+  subscribeToCopyFileContent(secret: String!): CopyFileContent
+  @aws_subscribe(mutations: ["sendCopyFileContent"])
+}

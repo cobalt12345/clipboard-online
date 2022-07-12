@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "api": {
+      "clipboardonline": [
+        "Query",
+        "Mutation",
+        "Subscription"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "foo",
+      "environmentVariableName": "FOO"
+    },
+    {
+      "cloudFormationParameterName": "reactAppVapidSubject",
+      "environmentVariableName": "REACT_APP_VAPID_SUBJECT"
+    },
+    {
+      "cloudFormationParameterName": "reactAppVapidPublicKey",
+      "environmentVariableName": "REACT_APP_VAPID_PUBLIC_KEY"
+    },
+    {
+      "cloudFormationParameterName": "reactAppVapidPrivateKey",
+      "environmentVariableName": "REACT_APP_VAPID_PRIVATE_KEY"
+    }
+  ]
+}
