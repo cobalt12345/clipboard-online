@@ -21,7 +21,7 @@
       "function": {
         "CopyPasteTextContentDatasourceAdapter": {
           "deploymentBucketName": "amplify-clipboardonline-dev-43556-deployment",
-          "s3Key": "amplify-builds/CopyPasteTextContentDatasourceAdapter-643043366f7032395a53-build.zip",
+          "s3Key": "amplify-builds/CopyPasteTextContentDatasourceAdapter-41414b4b4f35434f5a50-build.zip",
           "foo": "BAR",
           "reactAppVapidSubject": "mailto: <denis.talochkin@gmail.com>",
           "reactAppVapidPublicKey": "***REMOVED***",

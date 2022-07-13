@@ -7,30 +7,13 @@ class FileUpload extends React.Component {
         this.state = {
             secret: props.secret,
             uploadedFilesReadyForSubmit: {},
-            isFilesReady: false,
-            receivedFiles: []
+            isFilesReady: false
         };
-        console.debug('Secret:', props.secret, 'Client:', props.client);
+        console.debug('Secret:', props.secret(), 'Client:', props.client);
         this.apiClient = props.client;
         this.fileInputRef = React.createRef();
         this.fileUploadFormRef = React.createRef();
         this.componentDidMount = this.componentDidMount.bind(this);
-        this.fileContentReceived = this.fileContentReceived.bind(this);
-    }
-
-    fileContentReceived(content) {
-        console.debug('Received file:', content);
-        const {fileName, fileContent} = content.value.data.subscribeToCopyFileContent;
-        this.setState((prev) => {
-            let fileLink = "<iframe src='" + fileContent + "' frameborder=\"0\" style=\"border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;\" allowfullscreen>" + "" + "</iframe>";
-            let newState = {'receivedFiles' : prev.receivedFiles.concat([fileLink])};
-            setTimeout(() => {
-                let popup = window.open();
-                popup.document.write(fileLink);
-            });
-
-            return newState;
-        })
     }
 
     componentWillUnmount() {
@@ -39,7 +22,6 @@ class FileUpload extends React.Component {
 
     componentDidMount() {
         console.debug('File upload mounted')
-        this.apiClient.onReceiveFileCallback = this.fileContentReceived;
         this.fileInputRef.current.addEventListener('change', async (event) => {
             console.debug('File(s) chosen for upload', JSON.stringify(event.target.files));
             const files = event.target.files;
@@ -65,7 +47,7 @@ class FileUpload extends React.Component {
                             nextState['uploadedFilesReadyForSubmit'][file.name]
                                 = `data:${file.type};base64,${btoa(event.target.result)}`;
 
-                            console.debug('File(s) uploaded', JSON.stringify(nextState));
+                            console.debug('File(s) uploaded', JSON.stringify(nextState).substring(0, 100));
 
                             return nextState;
                         });
@@ -96,9 +78,9 @@ class FileUpload extends React.Component {
             if (!this.state.isFilesReady) {
                 alert('files still getting processed')
             } else {
-                console.debug(JSON.stringify(this.state.uploadedFilesReadyForSubmit));
+                console.debug(JSON.stringify(this.state.uploadedFilesReadyForSubmit).substring(0, 100));
                 Object.entries(this.state.uploadedFilesReadyForSubmit).forEach((file) => {
-                    this.apiClient.saveFileContent(file[1], file[0], this.state.secret);
+                    this.apiClient.saveFileContent(file[1], file[0], this.state.secret());
                 });
             }
         }
@@ -111,10 +93,6 @@ class FileUpload extends React.Component {
             <Grid container direction="column" padding={2} spacing={2}>
                 <Grid item>
                     <form id="fileUploadForm" ref={this.fileUploadFormRef}>
-                        <label htmlFor="nameInput">Name</label>
-                        <input type="text" id="nameInput"/>
-                        <label htmlFor="messageInput">Message</label>
-                        <textarea id="messageInput" cols="30" rows="2"></textarea>
                         <input type="file" id="fileInput" name="file" ref={this.fileInputRef} multiple />
                         <button type="submit">Submit</button>
                     </form>

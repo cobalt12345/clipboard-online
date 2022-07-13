@@ -8,10 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 class ApiClient {
 
-    constructor(onReceiveMessageCallback: function, onReceiveFileCallback: function) {
-        this.onReceiveMessageCallback = onReceiveMessageCallback;
-        this.onReceiveFileCallback = onReceiveFileCallback;
-
+    constructor() {
         this.storeWebPushSubscription = this.storeWebPushSubscription.bind(this);
     }
 
@@ -27,10 +24,10 @@ class ApiClient {
         return API.graphql(graphqlOperation(mutations.sendCopyPasteTextContent, {secret, data: content}));
     }
 
-    getFileContent(secret: String) {
+    awaitFileContent(secret: String, onReceiveFileCallback: function) {
         const subscription = API.graphql(graphqlOperation(subscriptions.subscribeToCopyFileContent,
             {secret})).subscribe(
-            this.onReceiveFileCallback,
+            onReceiveFileCallback,
             (errorValue) => {console.error('API subscriptionOnFileContent error(file)', JSON.stringify(errorValue))},
             () => console.debug('API subscriptionOnFileContent complete(file)')
         );
@@ -38,10 +35,10 @@ class ApiClient {
         return subscription;
     }
 
-    getTextContent(secret: String) {
+    awaitTextContent(secret: String, onReceiveMessageCallback: function) {
         const subscription = API.graphql(graphqlOperation(subscriptions.subscribeToCopyPasteTextContent,
             {secret})).subscribe({
-            next: this.onReceiveMessageCallback,
+            next: onReceiveMessageCallback,
             error: (errorValue => {console.error('API subscriptionOnTextContent error(text)', JSON.stringify(errorValue))}),
             complete: () => console.debug("API subscriptionOnTextContent complete(text)")
         });
@@ -49,24 +46,24 @@ class ApiClient {
         return subscription;
     }
 
-    async storeWebPushSubscription(subscription, secret) {
-        console.debug(`Store webpush subscription ${subscription} with secret ${secret}`);
+    async storeWebPushSubscription(subscription, secr) {
+        console.debug(`Store web push subscription ${subscription} with secret ${secr}`);
 
         let foundSubscriptions = await API.graphql(graphqlOperation(queries.listWebPushSubscriptions,
-            {subscription}));
+            {filter: {secret: {eq: secr.toString()}}}));
 
-        // console.debug("Found subscriptions", JSON.stringify(foundSubscriptions));
+        console.debug("Found subscriptions", JSON.stringify(foundSubscriptions));
 
-        if (foundSubscriptions?.data?.subscription?.items?.length) {
+        if (foundSubscriptions?.data?.listWebPushSubscriptions?.items?.length) {
             console.debug("Update found subscriptions...")
             let promises = [];
-            for (const item of foundSubscriptions.data.subscription.items) {
-                const index = foundSubscriptions.data.subscription.items.indexOf(item);
+            for (const item of foundSubscriptions.data.listWebPushSubscriptions.items) {
+                const index = foundSubscriptions.data.listWebPushSubscriptions.items.indexOf(item);
                 console.debug('Update item of the same version', JSON.stringify(item), index)
                 promises.push(API.graphql(graphqlOperation(mutations.updateWebPushSubscription, {
                     input: {
                         id: item.id,
-                        secret: secret,
+                        secret: secr,
                         subscription,
                         _version: item._version
 
@@ -79,7 +76,7 @@ class ApiClient {
             return API.graphql(graphqlOperation(mutations.createWebPushSubscription, {
                 input: {
                     id: uuidv4(),
-                    secret,
+                    secret: secr,
                     subscription
                 }
             }));

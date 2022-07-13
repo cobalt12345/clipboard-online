@@ -22,7 +22,7 @@ webpush.setVapidDetails(
  * @type {import('@types/aws-lambda').APIGatewayProxyHandler}
  */
 exports.handler = async (event, context, callback) => {
-    // console.debug(`EVENT: ${JSON.stringify(event)}`);
+    console.debug(`EVENT: ${JSON.stringify(event)}`);
     switch (event?.fieldName) {
         case 'sendCopyFileContent':
             await callbackOnSaveFileContent(event, callback);
