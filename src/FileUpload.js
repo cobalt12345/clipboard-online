@@ -1,5 +1,5 @@
 import React from "react";
-import {Grid} from "@mui/material";
+import {Alert, Grid} from "@mui/material";
 
 class FileUpload extends React.Component {
     constructor(props) {
@@ -7,7 +7,8 @@ class FileUpload extends React.Component {
         this.state = {
             secret: props.secret,
             uploadedFilesReadyForSubmit: {},
-            isFilesReady: false
+            isFilesReady: false,
+            popupMessage: null
         };
         console.debug('Secret:', props.secret(), 'Client:', props.client);
         this.apiClient = props.client;
@@ -28,6 +29,10 @@ class FileUpload extends React.Component {
             const filePromises = Object.entries(files).map(item => {
                 return new Promise((resolve, reject) => {
                     const [index, file] = item;
+                    if (file.size > process.env.REACT_APP_MAX_FILE_SIZE_IN_KILOBYTES) {
+                        this.setState({popupMessage: {severity: 'error', message: 'File is too large'}})
+                        return reject('File is too large!');
+                    }
                     const reader = new FileReader();
                     reader.readAsBinaryString(file);
 
@@ -51,7 +56,7 @@ class FileUpload extends React.Component {
 
                             return nextState;
                         });
-
+                        this.setState({popupMessage: null})
                         resolve()
                     };
 
@@ -86,15 +91,28 @@ class FileUpload extends React.Component {
         }
 
         this.fileUploadFormRef.current.addEventListener('submit', handleForm);
+        this.fileUploadFormRef.current.addEventListener('reset', () => this.setState(
+            {uploadedFilesReadyForSubmit: [], popupMessage: null}))
     }
 
     render() {
+
+        const files = Object.entries(this.state.uploadedFilesReadyForSubmit).map(
+            (file, index) => {return <li key={index}>{file[0]}</li>});
+
         return (
             <Grid container direction="column" padding={2} spacing={2}>
+                <Alert variant="outlined" severity={this.state.popupMessage?.severity}>
+                    {this.state.popupMessage?.message || `Max. file size: ${process.env.REACT_APP_MAX_FILE_SIZE_IN_KILOBYTES} kB`}
+                </Alert>
                 <Grid item>
                     <form id="fileUploadForm" ref={this.fileUploadFormRef}>
+                        <ol>
+                            {files}
+                        </ol>
                         <input type="file" id="fileInput" name="file" ref={this.fileInputRef} multiple />
                         <button type="submit">Submit</button>
+                        <button type="reset">Reset</button>
                     </form>
                 </Grid>
                 <Grid item>

@@ -33,7 +33,13 @@ class ClipBoard extends React.Component {
     }
 
     handleSecretTypeIn(event) {
-        this.setState({secret: event.target.value});
+        let newState = {
+            secret: event.target.value,
+        }
+        if (!event.target.value) {
+            newState['subscribedOnPush'] = false
+        }
+        this.setState(newState);
     }
 
     subscribeOnPush() {
@@ -59,6 +65,7 @@ class ClipBoard extends React.Component {
         const savedTextContent : CopyPasteTextContent = this.apiClient.saveTextContent(this.state.secret,
             this.state.input);
 
+        this.setState({input: '', contentId: savedTextContent.id});
         console.debug('Text content saved:', JSON.stringify(savedTextContent));
     }
 
@@ -116,6 +123,7 @@ class ClipBoard extends React.Component {
                     </Grid>
 
                     <Grid item xs={8}>
+                        {this.state.subscribedOnPush ?
                         <TextField
                             id="input"
                             label="Paste content here"
@@ -132,10 +140,12 @@ class ClipBoard extends React.Component {
                             variant="filled"
                             focused
                             // autoFocus
-                        />
+                        /> : null}
                     </Grid>
                     <Grid item xs={8}>
+                        {this.state.subscribedOnPush ?
                         <TextField
+                            unselectable="off"
                             id="output"
                             label="Copy content"
                             multiline
@@ -148,18 +158,25 @@ class ClipBoard extends React.Component {
                             disabled
                             value={this.state.output}
                             variant="filled"
-                        />
+                        /> : null}
                     </Grid>
                     <Grid container direction="row" justifyContent="center" alignItems="center" spacing={2} padding={2}>
                             <Grid item>
-                                <Button onClick={this.subscribeOnPush} variant="contained">Subscribe</Button>
+                                {this.state.secret ?
+                                    <Button onClick={this.subscribeOnPush} variant="contained">Subscribe</Button> : null
+                                }
                             </Grid>
                             <Grid item>
-                                <Button onClick={this.sendTextContent} variant="contained">Add</Button>
+                                {this.state.subscribedOnPush ?
+                                    <Button onClick={this.sendTextContent} variant="contained" disabled={!this.state.input}>Add</Button> : null
+                                }
+
                             </Grid>
                     </Grid>
                     <Grid item xs={8}>
-                        <FileUpload secret={() => this.state.secret} client={this.apiClient} />
+                        {this.state.subscribedOnPush ?
+                            <FileUpload secret={() => this.state.secret} client={this.apiClient}/> : null
+                        }
                     </Grid>
                 </Grid>
             </Paper>
@@ -178,7 +195,7 @@ class ClipBoard extends React.Component {
             console.error(reason);
             this.setState({popupMessage: {
                     severity: 'warning',
-                    message: 'Couldn\'t copy to clipboard'
+                    message: 'Couldn\'t copy to clipboard. Reason: '.concat(reason.toString())
                 }})
         });
     }

@@ -46,42 +46,17 @@ class ApiClient {
         return subscription;
     }
 
-    async storeWebPushSubscription(subscription, secr) {
-        console.debug(`Store web push subscription ${subscription} with secret ${secr}`);
-
-        let foundSubscriptions = await API.graphql(graphqlOperation(queries.listWebPushSubscriptions,
-            {filter: {secret: {eq: secr.toString()}}}));
-
-        console.debug("Found subscriptions", JSON.stringify(foundSubscriptions));
-
-        if (foundSubscriptions?.data?.listWebPushSubscriptions?.items?.length) {
-            console.debug("Update found subscriptions...")
-            let promises = [];
-            for (const item of foundSubscriptions.data.listWebPushSubscriptions.items) {
-                const index = foundSubscriptions.data.listWebPushSubscriptions.items.indexOf(item);
-                console.debug('Update item of the same version', JSON.stringify(item), index)
-                promises.push(API.graphql(graphqlOperation(mutations.updateWebPushSubscription, {
-                    input: {
-                        id: item.id,
-                        secret: secr,
-                        subscription,
-                        _version: item._version
-
-                    }
-                })))
+    storeWebPushSubscription(subscription, secr) {
+        console.debug("Create a new subscriptionOnTextContent...");
+        return API.graphql(graphqlOperation(mutations.createWebPushSubscription, {
+            input: {
+                id: uuidv4(),
+                secret: secr,
+                subscription
             }
-            return await Promise.all(promises);
-        } else {
-            console.debug("Create a new subscriptionOnTextContent...");
-            return API.graphql(graphqlOperation(mutations.createWebPushSubscription, {
-                input: {
-                    id: uuidv4(),
-                    secret: secr,
-                    subscription
-                }
-            }));
-        }
+        }));
     }
+
 }
 
 export default ApiClient;
