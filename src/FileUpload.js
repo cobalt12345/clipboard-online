@@ -29,7 +29,8 @@ class FileUpload extends React.Component {
             const filePromises = Object.entries(files).map(item => {
                 return new Promise((resolve, reject) => {
                     const [index, file] = item;
-                    if (file.size > process.env.REACT_APP_MAX_FILE_SIZE_IN_KILOBYTES) {
+                    console.debug('')
+                    if (file.size > process.env.REACT_APP_MAX_FILE_SIZE_IN_BYTES) {
                         this.setState({popupMessage: {severity: 'error', message: 'File is too large'}})
                         return reject('File is too large!');
                     }
@@ -103,7 +104,8 @@ class FileUpload extends React.Component {
         return (
             <Grid container direction="column" padding={2} spacing={2}>
                 <Alert variant="outlined" severity={this.state.popupMessage?.severity}>
-                    {this.state.popupMessage?.message || `Max. file size: ${process.env.REACT_APP_MAX_FILE_SIZE_IN_KILOBYTES} kB`}
+                    {this.state.popupMessage?.message ||
+                        `Max. file size: ${Number.parseInt(process.env.REACT_APP_MAX_FILE_SIZE_IN_BYTES) / 1000} kB`}
                 </Alert>
                 <Grid item>
                     <form id="fileUploadForm" ref={this.fileUploadFormRef}>

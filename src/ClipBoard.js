@@ -26,6 +26,7 @@ class ClipBoard extends React.Component {
         this.sendTextContent = this.sendTextContent.bind(this)
         this.receivedTextContent = this.receivedTextContent.bind(this)
         this.receivedFile = this.receivedFile.bind(this)
+        this.isAppleDevice = this.isAppleDevice.bind(this)
     }
 
     handleTextTypeIn(event) {
@@ -49,7 +50,7 @@ class ClipBoard extends React.Component {
             this.fileSubcription?.unsubscribe();
             this.textContentSubscription = this.apiClient.awaitTextContent(this.state.secret, this.receivedTextContent);
             this.fileSubcription = this.apiClient.awaitFileContent(this.state.secret, this.receivedFile)
-            subscribe(this.state.secret, this.apiClient)
+            subscribe(this.state.secret, this.apiClient, this.isAppleDevice())
                 .then((value) => {
                     console.debug('Subscribed to web push notifications', value);
                     this.setState({subscribedOnPush: true})
@@ -198,6 +199,21 @@ class ClipBoard extends React.Component {
                     message: 'Couldn\'t copy to clipboard. Reason: '.concat(reason.toString())
                 }})
         });
+    }
+
+    isAppleDevice() {
+        if (navigator.appVersion.indexOf('Win') != -1) {
+            console.debug('OS Windows')
+
+            return false;
+        } else if (navigator.appVersion.indexOf('Mac') != -1 && navigator.appVersion.indexOf('Chrome') != -1) {
+            console.debug('Mac OS & Chrome')
+
+            return false;
+        } else {
+
+            return true;
+        }
     }
 }
 

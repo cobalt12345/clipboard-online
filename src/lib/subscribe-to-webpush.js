@@ -18,7 +18,7 @@ export async function requestNotificationPermission () {
  * @param apiClient
  * @returns {Promise<void>}
  */
-export default async function subscribe(secret, apiClient: ApiClient, isAppleDevice: boolean = false) {
+export default async function subscribe(secret, apiClient: ApiClient, isAppleDevice) {
     if (!isAppleDevice) {
         console.debug('Web push subscribe. Secret: %s', secret);
         let swReg = await navigator.serviceWorker.register("/sw.js");
@@ -34,7 +34,7 @@ export default async function subscribe(secret, apiClient: ApiClient, isAppleDev
         }
         apiClient.storeWebPushSubscription(JSON.stringify(subscription), secret);
     } else {
-        console.warn('Web Push notifications are not supported for Ios or MacOS');
+        console.warn('Web Push notifications are not supported for Ios');
     }
 }
 
