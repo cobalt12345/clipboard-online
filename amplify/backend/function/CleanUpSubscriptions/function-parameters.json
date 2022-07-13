@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "api": {
+      "clipboardonline": [
+        "Query",
+        "Mutation"
+      ]
+    },
+    "function": {
+      "CopyPasteTextContentDatasourceAdapter": [
+        "read"
+      ]
+    },
+    "storage": {
+      "WebPushSubscription:@model(appsync)": [
+        "read",
+        "delete"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "tableName",
+      "environmentVariableName": "TableName"
+    }
+  ]
+}
