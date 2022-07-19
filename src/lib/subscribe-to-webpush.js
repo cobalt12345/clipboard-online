@@ -28,7 +28,7 @@ export default async function subscribe(secret, apiClient: ApiClient, isAppleDev
             subscription = await swReg.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlB64ToUint8Array(config.pushKey),
-                topic: secret
+                secret: secret
             });
 
         }

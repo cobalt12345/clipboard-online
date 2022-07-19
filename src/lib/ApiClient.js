@@ -24,22 +24,29 @@ class ApiClient {
         return API.graphql(graphqlOperation(mutations.sendCopyPasteTextContent, {secret, data: content}));
     }
 
-    awaitFileContent(secret: String, onReceiveFileCallback: function) {
+    awaitFileContent(secret: String, onReceiveFileCallback: function, onSubscriptionErrorCallback: function) {
         const subscription = API.graphql(graphqlOperation(subscriptions.subscribeToCopyFileContent,
             {secret})).subscribe(
             onReceiveFileCallback,
-            (errorValue) => {console.error('API subscriptionOnFileContent error(file)', JSON.stringify(errorValue))},
+            (errorValue) => {
+                    console.error('API subscriptionOnFileContent error(file)',
+                    JSON.stringify(errorValue));
+                    onSubscriptionErrorCallback("Connection closed. Re-subscribe.")},
             () => console.debug('API subscriptionOnFileContent complete(file)')
         );
 
         return subscription;
     }
 
-    awaitTextContent(secret: String, onReceiveMessageCallback: function) {
+    awaitTextContent(secret: String, onReceiveMessageCallback: function, onSubscriptionErrorCallback: function) {
         const subscription = API.graphql(graphqlOperation(subscriptions.subscribeToCopyPasteTextContent,
             {secret})).subscribe({
             next: onReceiveMessageCallback,
-            error: (errorValue => {console.error('API subscriptionOnTextContent error(text)', JSON.stringify(errorValue))}),
+            error: (errorValue => {
+                    console.error('API subscriptionOnTextContent error(text)',
+                    JSON.stringify(errorValue));
+                    onSubscriptionErrorCallback("Connection closed. Re-subscribe.");
+            }),
             complete: () => console.debug("API subscriptionOnTextContent complete(text)")
         });
 

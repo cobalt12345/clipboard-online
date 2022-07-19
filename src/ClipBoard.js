@@ -1,11 +1,12 @@
 import React from "react";
-import {Alert, AppBar, Grid, Paper, TextField, Toolbar, Typography} from "@mui/material";
+import {Alert, AppBar, Box, Container, Grid, Paper, TextField, Toolbar, Typography} from "@mui/material";
 import Button from "@mui/material/Button";
 import ApiClient from "./lib/ApiClient";
 import {CopyPasteTextContent} from "./models";
 import subscribe from "./lib/subscribe-to-webpush";
 import ProTip from "./ProTip";
 import FileUpload from "./FileUpload";
+import isAppleDevice from "./lib/utils";
 
 class ClipBoard extends React.Component {
 
@@ -26,7 +27,7 @@ class ClipBoard extends React.Component {
         this.sendTextContent = this.sendTextContent.bind(this)
         this.receivedTextContent = this.receivedTextContent.bind(this)
         this.receivedFile = this.receivedFile.bind(this)
-        this.isAppleDevice = this.isAppleDevice.bind(this)
+        this.copyToClipboard = this.copyToClipboard.bind(this)
     }
 
     handleTextTypeIn(event) {
@@ -48,12 +49,32 @@ class ClipBoard extends React.Component {
             console.debug('Subscribe on push notifications');
             this.textContentSubscription?.unsubscribe();
             this.fileSubcription?.unsubscribe();
-            this.textContentSubscription = this.apiClient.awaitTextContent(this.state.secret, this.receivedTextContent);
-            this.fileSubcription = this.apiClient.awaitFileContent(this.state.secret, this.receivedFile)
-            subscribe(this.state.secret, this.apiClient, this.isAppleDevice())
+            this.textContentSubscription = this.apiClient.awaitTextContent(this.state.secret, this.receivedTextContent,
+                (error)=>{
+                    this.setState({
+                        popupMessage: {
+                            severity: "error",
+                            message: error
+                        }
+                    })
+                });
+            this.fileSubcription = this.apiClient.awaitFileContent(this.state.secret, this.receivedFile,
+                (error)=>{
+                    this.setState({
+                        popupMessage: {
+                            severity: "error",
+                            message: error
+                        }
+                    })
+                });
+
+            subscribe(this.state.secret, this.apiClient, isAppleDevice())
                 .then((value) => {
                     console.debug('Subscribed to web push notifications', value);
-                    this.setState({subscribedOnPush: true})
+                    this.setState({subscribedOnPush: true, popupMessage: {
+                            severity: "info",
+                            message: `Subscribed to ${this.state.secret}`
+                    }})
                 })
                 .catch((reason) => {
                     console.error('Subscription to web push notifications failed', reason)
@@ -74,7 +95,6 @@ class ClipBoard extends React.Component {
         console.debug('Received text content', event);
         const textContent = event.value.data.subscribeToCopyPasteTextContent.body;
         this.setState({output: textContent});
-        this.copyToClipboard(textContent);
     }
 
     receivedFile(event) {
@@ -85,7 +105,16 @@ class ClipBoard extends React.Component {
             let newState = {'receivedFiles' : prev.receivedFiles.concat([fileLink])};
             setTimeout(() => {
                 let popup = window.open();
-                popup.document.write(fileLink);
+                if (!popup) {
+                    this.setState({
+                        popupMessage: {
+                            severity: 'error',
+                            message: 'Allow pop-ups in your browser'
+                        }
+                    })
+                } else {
+                    popup.document.write(fileLink);
+                }
             });
 
             return newState;
@@ -101,120 +130,121 @@ class ClipBoard extends React.Component {
                         </Typography>
                         <ProTip />
                     </Toolbar>
+                    { this.state.popupMessage ? (
+                        <Alert variant="standard" severity={this.state.popupMessage.severity}>
+                            {this.state.popupMessage.message}
+                        </Alert>) : null
+                    }
                 </AppBar>
-                { this.state.popupMessage ? (
-                    <Alert variant="outlined" severity={this.state.popupMessage.severity}>
-                        {this.state.popupMessage.message}
-                    </Alert>) : null
-                }
-                <Grid container spacing={2} columns={10}  paddingTop={2} direction="column"
+
+                    <Grid container direction="row"
+                          justifyContent="center"
+                          alignItems="center"
+                          spacing={2}
+                          columns={{xs: 4, sm: 8, md: 12}}
+                          marginTop={0}>
+                        <Grid item xs={2} sm={4} md={6} textAlign="end">
+                            <TextField
+                                id="secret"
+                                label="Secret phrase"
+                                value={this.state.secret}
+                                onChange={this.handleSecretTypeIn}
+                                variant="filled"
+                            />
+                        </Grid>
+                        <Grid item xs={2} sm={4} md={6}>
+                            {this.state.secret ?
+                                <Button onClick={this.subscribeOnPush} variant="contained">Subscribe</Button> : null
+                            }
+                        </Grid>
+                    </Grid>
+
+                <Grid container direction="row"
                       justifyContent="center"
-                      alignItems="center">
-                    <Grid item xs={8}>
-                        <TextField
-                            id="input"
-                            label="Secret phrase"
-                            sx={{
-                                minWidth: 500
-                            }}
-                            value={this.state.secret}
-                            onChange={this.handleSecretTypeIn}
-                            variant="filled"
-                        />
-                    </Grid>
+                      alignItems="center"
+                      spacing={1}
+                      columns={{xs: 4, sm: 8, md: 12}}
+                      margin={0}
+                      padding={1}>
 
-                    <Grid item xs={8}>
+                    <Grid item xs={4} sm={8} md={12}>
                         {this.state.subscribedOnPush ?
-                        <TextField
-                            id="input"
-                            label="Paste content here"
-                            multiline
-                            sx={{
-                                minWidth: 500,
-                                width: 1000
-                            }}
-                            fullWidth
-                            rows={10}
-
-                            value={this.state.input}
-                            onChange={this.handleTextTypeIn}
-                            variant="filled"
-                            focused
-                            // autoFocus
-                        /> : null}
+                            <TextField
+                                id="input"
+                                label="Paste content here"
+                                multiline
+                                rows={5}
+                                value={this.state.input}
+                                onChange={this.handleTextTypeIn}
+                                variant="filled"
+                                focused
+                                sx={{width: '95%'}}
+                            /> : null}
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid item xs={4} sm={8} md={12}>
                         {this.state.subscribedOnPush ?
-                        <TextField
-                            unselectable="off"
-                            id="output"
-                            label="Copy content"
-                            multiline
-                            sx={{
-                                minWidth: 500,
-                                width: 1000
-                            }}
-                            rows={10}
-                            fullWidth
-                            disabled
-                            value={this.state.output}
-                            variant="filled"
-                        /> : null}
+                            <TextField
+                                unselectable="off"
+                                id="output"
+                                label="Click here to copy content to the clipboard"
+                                multiline
+                                sx={{
+                                    width: "95%"
+                                }}
+                                rows={5}
+                                fullWidth
+                                disabled
+                                onClick={(event) => {this.copyToClipboard(event.target.value)}}
+                                value={this.state.output}
+                                variant="filled"
+                            /> : null}
                     </Grid>
-                    <Grid container direction="row" justifyContent="center" alignItems="center" spacing={2} padding={2}>
-                            <Grid item>
-                                {this.state.secret ?
-                                    <Button onClick={this.subscribeOnPush} variant="contained">Subscribe</Button> : null
-                                }
-                            </Grid>
-                            <Grid item>
-                                {this.state.subscribedOnPush ?
-                                    <Button onClick={this.sendTextContent} variant="contained" disabled={!this.state.input}>Add</Button> : null
-                                }
-
-                            </Grid>
+                    <Grid item xs={4} sm={8} md={12} alignItems="center" textAlign="center">
+                        {this.state.subscribedOnPush ?
+                            <Button onClick={this.sendTextContent} variant="contained" disabled={!this.state.input}>Add</Button> : null
+                        }
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid item xs={4} sm={8} md={12} alignItems="center" textAlign="center">
                         {this.state.subscribedOnPush ?
                             <FileUpload secret={() => this.state.secret} client={this.apiClient}/> : null
                         }
                     </Grid>
                 </Grid>
             </Paper>
+
         );
     }
 
     copyToClipboard(value) {
         console.debug('Copy data to clipboard:', value);
-        navigator.clipboard.writeText(value).then((value) => {
-            console.debug('Copied to clipboard');
-            this.setState({popupMessage: {
-                    severity: 'success',
-                    message: 'Copied to clipboard'
-                }})
-        }, (reason) => {
-            console.error(reason);
-            this.setState({popupMessage: {
-                    severity: 'warning',
-                    message: 'Couldn\'t copy to clipboard. Reason: '.concat(reason.toString())
-                }})
-        });
-    }
-
-    isAppleDevice() {
-        if (navigator.appVersion.indexOf('Win') != -1) {
-            console.debug('OS Windows')
-
-            return false;
-        } else if (navigator.appVersion.indexOf('Mac') != -1 && navigator.appVersion.indexOf('Chrome') != -1) {
-            console.debug('Mac OS & Chrome')
-
-            return false;
+        if (!navigator.clipboard) {
+            this.setState({
+                popupMessage: {
+                    severity: 'error',
+                    message: 'Clipboard is available only for https'
+                }
+            })
         } else {
-
-            return true;
+            navigator.clipboard.writeText(value).then((value) => {
+                console.debug('Copied to clipboard');
+                this.setState({
+                    popupMessage: {
+                        severity: 'success',
+                        message: 'Copied to clipboard'
+                    }
+                })
+            }, (reason) => {
+                console.error(reason);
+                this.setState({
+                    popupMessage: {
+                        severity: 'warning',
+                        message: 'Couldn\'t copy to clipboard. Reason: '.concat(reason.toString())
+                    }
+                })
+            });
         }
     }
+
 }
 
 export default ClipBoard;
