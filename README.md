@@ -13,7 +13,7 @@ The longer secret word is, the higher data confidentiality will be.</strong>
 
 Secret words/rooms are cleaned up periodically and can be safely re-used again.
 
-![Clipboard UI](https://github.com/cobalt12345/clipboard-online/blob/9ddb897395b63b24d15468a82da1e96d79239e01/ui.png | width=300)
+![Clipboard UI](https://github.com/cobalt12345/clipboard-online/blob/9ddb897395b63b24d15468a82da1e96d79239e01/ui.png)
 
 ## Application Architecture
 
@@ -24,7 +24,7 @@ Lambda function implements a fanout for Web Push notifications - user is notifie
 has closed an application tab.<br/>
 Files are encoded to the Base64 and transferred as simple strings.
 
-![Clipboard Design](https://github.com/cobalt12345/clipboard-online/blob/2b7eac68658ffe8cd4570f4fbe929b7ad028104f/clipboard-design.png | width=300)
+![Clipboard Design](https://github.com/cobalt12345/clipboard-online/blob/2b7eac68658ffe8cd4570f4fbe929b7ad028104f/clipboard-design.png)
 
 Web Push notifications are supported for the desktop Google Chrome only. Implementation for Apple devices requires
 a registered developer account.
