@@ -24,8 +24,8 @@
           "s3Key": "amplify-builds/CopyPasteTextContentDatasourceAdapter-41414b4b4f35434f5a50-build.zip",
           "foo": "BAR",
           "reactAppVapidSubject": "mailto: <denis.talochkin@gmail.com>",
-          "reactAppVapidPublicKey": "***REMOVED***",
-          "reactAppVapidPrivateKey": "***REMOVED***"
+          "reactAppVapidPublicKey": "",
+          "reactAppVapidPrivateKey": ""
         }
       }
     }
