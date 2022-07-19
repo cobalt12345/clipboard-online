@@ -26,6 +26,7 @@ export declare class WebPushSubscription {
   readonly id: string;
   readonly subscription: string;
   readonly secret: string;
+  readonly _ttl: number;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   constructor(init: ModelInit<WebPushSubscription, WebPushSubscriptionMetaData>);

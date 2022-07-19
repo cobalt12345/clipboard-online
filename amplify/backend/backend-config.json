@@ -42,29 +42,6 @@
           ]
         }
       ]
-    },
-    "CleanUpSubscriptions": {
-      "build": true,
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda",
-      "dependsOn": [
-        {
-          "category": "api",
-          "resourceName": "clipboardonline",
-          "attributes": [
-            "GraphQLAPIIdOutput",
-            "GraphQLAPIEndpointOutput",
-            "GraphQLAPIKeyOutput"
-          ]
-        },
-        {
-          "category": "function",
-          "resourceName": "CopyPasteTextContentDatasourceAdapter",
-          "attributes": [
-            "Name"
-          ]
-        }
-      ]
     }
   }
 }

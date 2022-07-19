@@ -27,6 +27,7 @@ export const onCreateWebPushSubscription = /* GraphQL */ `
       id
       subscription
       secret
+      _ttl
       createdAt
       updatedAt
       _version
@@ -41,6 +42,7 @@ export const onUpdateWebPushSubscription = /* GraphQL */ `
       id
       subscription
       secret
+      _ttl
       createdAt
       updatedAt
       _version
@@ -55,6 +57,7 @@ export const onDeleteWebPushSubscription = /* GraphQL */ `
       id
       subscription
       secret
+      _ttl
       createdAt
       updatedAt
       _version

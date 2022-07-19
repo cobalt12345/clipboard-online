@@ -26,11 +26,6 @@
           "reactAppVapidSubject": "mailto: <denis.talochkin@gmail.com>",
           "reactAppVapidPublicKey": "***REMOVED***",
           "reactAppVapidPrivateKey": "***REMOVED***"
-        },
-        "CleanUpSubscriptions": {
-          "deploymentBucketName": "amplify-clipboardonline-dev-43556-deployment",
-          "s3Key": "amplify-builds/CleanUpSubscriptions-574b6b453230356d4e33-build.zip",
-          "tableName": "WebPushSubscription-ffffbplvdzfvlhn7quzs6b635q-dev"
         }
       }
     }

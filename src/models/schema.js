@@ -24,6 +24,13 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
+                "_ttl": {
+                    "name": "_ttl",
+                    "isArray": false,
+                    "type": "AWSTimestamp",
+                    "isRequired": true,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -147,5 +154,5 @@ export const schema = {
             }
         }
     },
-    "version": "bbb01bfc75f5ce65499e77cceb76616f"
+    "version": "47bef9fe5c61feb14af15cc7a1f266e3"
 };

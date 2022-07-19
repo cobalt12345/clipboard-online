@@ -6,6 +6,7 @@ type WebPushSubscription @model @auth(rules: [{ allow: public, provider: apiKey 
   id: ID!
   subscription: String! @index(name: "subscriptionOnTextContent-index", queryField: "subscriptionOnTextContent")
   secret: String!
+  _ttl: AWSTimestamp!
 }
 
 

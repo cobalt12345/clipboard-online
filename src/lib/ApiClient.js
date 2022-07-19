@@ -8,6 +8,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 class ApiClient {
 
+    REMOVE_SUBSCRIPTION_IN_MSEC = process.env.REACT_APP_REMOVE_SUBSCRIPTION_IN_HRS * 60 * 60 * 1000;
+
     constructor() {
         this.storeWebPushSubscription = this.storeWebPushSubscription.bind(this);
     }
@@ -59,7 +61,8 @@ class ApiClient {
             input: {
                 id: uuidv4(),
                 secret: secr,
-                subscription
+                subscription,
+                _ttl: Date.now() + this.REMOVE_SUBSCRIPTION_IN_MSEC
             }
         }));
     }
