@@ -150,7 +150,7 @@ class ClipBoard extends React.Component {
                         <Typography variant="h6" color="inherit" component="div">
                         </Typography>
                         <ProTip />
-                        <QRCodeSVG value={this.state.roomLink} style={{marginLeft: 10}} />
+
                     </Toolbar>
                     { this.state.popupMessage ? (
                         <Alert variant="standard" severity={this.state.popupMessage.severity}>
@@ -176,7 +176,11 @@ class ClipBoard extends React.Component {
                         </Grid>
                         <Grid item xs={2} sm={4} md={6}>
                             {this.state.secret ?
-                                <Button onClick={this.subscribeOnPush} variant="contained">Subscribe</Button> : null
+                                <Button onClick={this.subscribeOnPush} variant="contained">Subscribe
+                                    <QRCodeSVG value={this.state.roomLink} style={{marginLeft: 10, width: 50, height: 50}}
+                                               renderAs='svg' level='L'
+                                               bgColor='#165FC7' fgColor='#FFFFFF' imageSettings={{height: 50, width: 70, excavate: false}}/>
+                                </Button> : null
                             }
                         </Grid>
                     </Grid>
