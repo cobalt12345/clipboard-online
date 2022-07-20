@@ -7,6 +7,7 @@ import subscribe from "./lib/subscribe-to-webpush";
 import ProTip from "./ProTip";
 import FileUpload from "./FileUpload";
 import isAppleDevice from "./lib/utils";
+import {QRCodeSVG} from 'qrcode.react';
 
 class ClipBoard extends React.Component {
 
@@ -18,7 +19,8 @@ class ClipBoard extends React.Component {
             secret: '',
             subscribedObPush: false,
             popupMessage: null,
-            receivedFiles: []
+            receivedFiles: [],
+            roomLink: window.location.href
         }
         this.apiClient = new ApiClient();
         this.handleTextTypeIn = this.handleTextTypeIn.bind(this)
@@ -28,6 +30,15 @@ class ClipBoard extends React.Component {
         this.receivedTextContent = this.receivedTextContent.bind(this)
         this.receivedFile = this.receivedFile.bind(this)
         this.copyToClipboard = this.copyToClipboard.bind(this)
+        this.componentDidMount = this.componentDidMount.bind(this)
+    }
+
+    componentDidMount() {
+        const params = new URLSearchParams(window.location.search);
+        let roomId = params.get('room')
+        if (roomId) {
+            this.setState({secret: roomId, roomLink: `${window.location.href}`})
+        }
     }
 
     handleTextTypeIn(event) {
@@ -70,18 +81,28 @@ class ClipBoard extends React.Component {
 
             subscribe(this.state.secret, this.apiClient, isAppleDevice())
                 .then((value) => {
-                    console.debug('Subscribed to web push notifications', value);
-                    this.setState({subscribedOnPush: true, popupMessage: {
-                            severity: "info",
-                            message: `Subscribed to ${this.state.secret}`
-                    }})
-                })
-                .catch((reason) => {
-                    console.error('Subscription to web push notifications failed', reason)
-                    this.setState({subscribedOnPush: false})
-                });
+                        console.debug('Subscribed to web push notifications', value);
+                        this.setState((prevState, prevProps) => {
+                                return {
+                                    subscribedOnPush: true,
+                                    popupMessage: {
+                                        severity: "info",
+                                        message: `Subscribed to ${this.state.secret}`
+                                    },
+                                    roomLink: (!window.location.search) ?
+                                        `${window.location.href}?room=${this.state.secret}` :
+                                            `${window.location.origin}?room=${this.state.secret}`
+                                }
+                            }
+                        )
+                    }).catch((reason) => {
+                        console.error('Subscription to web push notifications failed', reason)
+                        this.setState({subscribedOnPush: false})
+                    });
         }
     }
+
+
 
     sendTextContent() {
         const savedTextContent : CopyPasteTextContent = this.apiClient.saveTextContent(this.state.secret,
@@ -129,6 +150,7 @@ class ClipBoard extends React.Component {
                         <Typography variant="h6" color="inherit" component="div">
                         </Typography>
                         <ProTip />
+                        <QRCodeSVG value={this.state.roomLink} style={{marginLeft: 10}} />
                     </Toolbar>
                     { this.state.popupMessage ? (
                         <Alert variant="standard" severity={this.state.popupMessage.severity}>
