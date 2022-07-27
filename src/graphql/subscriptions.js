@@ -18,6 +18,8 @@ export const subscribeToCopyFileContent = /* GraphQL */ `
       fileName
       id
       secret
+      totalParts
+      partNo
     }
   }
 `;
@@ -27,7 +29,7 @@ export const onCreateWebPushSubscription = /* GraphQL */ `
       id
       subscription
       secret
-      _ttl
+      expire
       createdAt
       updatedAt
       _version
@@ -42,7 +44,7 @@ export const onUpdateWebPushSubscription = /* GraphQL */ `
       id
       subscription
       secret
-      _ttl
+      expire
       createdAt
       updatedAt
       _version
@@ -57,7 +59,7 @@ export const onDeleteWebPushSubscription = /* GraphQL */ `
       id
       subscription
       secret
-      _ttl
+      expire
       createdAt
       updatedAt
       _version

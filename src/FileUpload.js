@@ -15,10 +15,12 @@ class FileUpload extends React.Component {
         this.fileInputRef = React.createRef();
         this.fileUploadFormRef = React.createRef();
         this.componentDidMount = this.componentDidMount.bind(this);
+        this.componentWillUnmount = this.componentWillUnmount.bind(this);
     }
 
     componentWillUnmount() {
-        console.debug('File upload unmounted')
+        console.debug('File upload unmounted');
+
     }
 
     componentDidMount() {
@@ -79,6 +81,9 @@ class FileUpload extends React.Component {
                 })
         })
 
+        let resetForm = () => this.setState(
+            {uploadedFilesReadyForSubmit: [], popupMessage: null});
+
         let handleForm = async (event) => {
             event.preventDefault();
             if (!this.state.isFilesReady) {
@@ -92,8 +97,7 @@ class FileUpload extends React.Component {
         }
 
         this.fileUploadFormRef.current.addEventListener('submit', handleForm);
-        this.fileUploadFormRef.current.addEventListener('reset', () => this.setState(
-            {uploadedFilesReadyForSubmit: [], popupMessage: null}))
+        this.fileUploadFormRef.current.addEventListener('reset', resetForm)
     }
 
     render() {

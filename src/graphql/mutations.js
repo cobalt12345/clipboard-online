@@ -16,16 +16,22 @@ export const sendCopyFileContent = /* GraphQL */ `
     $fileContent: String!
     $fileName: String!
     $secret: String!
+    $totalParts: Int!
+    $partNo: Int!
   ) {
     sendCopyFileContent(
       fileContent: $fileContent
       fileName: $fileName
       secret: $secret
+      totalParts: $totalParts
+      partNo: $partNo
     ) {
       fileContent
       fileName
       id
       secret
+      totalParts
+      partNo
     }
   }
 `;
@@ -38,7 +44,7 @@ export const createWebPushSubscription = /* GraphQL */ `
       id
       subscription
       secret
-      _ttl
+      expire
       createdAt
       updatedAt
       _version
@@ -56,7 +62,7 @@ export const updateWebPushSubscription = /* GraphQL */ `
       id
       subscription
       secret
-      _ttl
+      expire
       createdAt
       updatedAt
       _version
@@ -74,7 +80,7 @@ export const deleteWebPushSubscription = /* GraphQL */ `
       id
       subscription
       secret
-      _ttl
+      expire
       createdAt
       updatedAt
       _version

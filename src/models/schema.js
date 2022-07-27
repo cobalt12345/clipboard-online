@@ -24,8 +24,8 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "_ttl": {
-                    "name": "_ttl",
+                "expire": {
+                    "name": "expire",
                     "isArray": false,
                     "type": "AWSTimestamp",
                     "isRequired": true,
@@ -150,9 +150,23 @@ export const schema = {
                     "type": "String",
                     "isRequired": true,
                     "attributes": []
+                },
+                "totalParts": {
+                    "name": "totalParts",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
+                },
+                "partNo": {
+                    "name": "partNo",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": true,
+                    "attributes": []
                 }
             }
         }
     },
-    "version": "47bef9fe5c61feb14af15cc7a1f266e3"
+    "version": "d7cfee682243082ba8ef0082157e4e11"
 };

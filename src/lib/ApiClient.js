@@ -16,8 +16,16 @@ class ApiClient {
 
     saveFileContent(fileContent: String, fileName: String, secret: String): CopyFileContent {
         console.debug('Save file %s with secret %s', fileName, secret);
-
-        return API.graphql(graphqlOperation(mutations.sendCopyFileContent, {fileContent, fileName, secret}));
+        console.debug('File size', fileContent.length);
+        console.debug('File content', fileContent);
+        let chunk = fileContent.match(/.{1,200000}/g);
+        const numOfParts = chunk.length;
+        console.debug('File parts', numOfParts);
+        chunk.forEach((element, index, wholeArray) => {
+            console.debug(`Part #${index} Length ${element.length}`)
+            API.graphql(graphqlOperation(mutations.sendCopyFileContent, {fileContent: element, fileName, secret,
+                totalParts: numOfParts, partNo: index}))
+        });
     }
 
     saveTextContent(secret: String, content: String): CopyPasteTextContent {
@@ -62,7 +70,7 @@ class ApiClient {
                 id: uuidv4(),
                 secret: secr,
                 subscription,
-                _ttl: Date.now() + this.REMOVE_SUBSCRIPTION_IN_MSEC
+                expire: Date.now() + this.REMOVE_SUBSCRIPTION_IN_MSEC
             }
         }));
     }

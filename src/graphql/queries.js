@@ -17,7 +17,7 @@ export const getWebPushSubscription = /* GraphQL */ `
       id
       subscription
       secret
-      _ttl
+      expire
       createdAt
       updatedAt
       _version
@@ -41,7 +41,7 @@ export const listWebPushSubscriptions = /* GraphQL */ `
         id
         subscription
         secret
-        _ttl
+        expire
         createdAt
         updatedAt
         _version
@@ -70,7 +70,7 @@ export const syncWebPushSubscriptions = /* GraphQL */ `
         id
         subscription
         secret
-        _ttl
+        expire
         createdAt
         updatedAt
         _version
@@ -101,7 +101,7 @@ export const subscriptionOnTextContent = /* GraphQL */ `
         id
         subscription
         secret
-        _ttl
+        expire
         createdAt
         updatedAt
         _version

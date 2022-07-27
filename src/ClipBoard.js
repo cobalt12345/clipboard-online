@@ -19,7 +19,7 @@ class ClipBoard extends React.Component {
             secret: '',
             subscribedObPush: false,
             popupMessage: null,
-            receivedFiles: [],
+            receivedFiles: new Map(),
             roomLink: window.location.href
         }
         this.apiClient = new ApiClient();
@@ -31,6 +31,11 @@ class ClipBoard extends React.Component {
         this.receivedFile = this.receivedFile.bind(this)
         this.copyToClipboard = this.copyToClipboard.bind(this)
         this.componentDidMount = this.componentDidMount.bind(this)
+        this.componentWillUnmount = this.componentWillUnmount.bind(this)
+    }
+
+    componentWillUnmount() {
+
     }
 
     componentDidMount() {
@@ -84,6 +89,7 @@ class ClipBoard extends React.Component {
                         console.debug('Subscribed to web push notifications', value);
                         this.setState((prevState, prevProps) => {
                                 return {
+                                    receivedFiles: new Map(),
                                     subscribedOnPush: true,
                                     popupMessage: {
                                         severity: "info",
@@ -120,23 +126,42 @@ class ClipBoard extends React.Component {
 
     receivedFile(event) {
         console.debug('Received file', event)
-        const {fileName, fileContent} = event.value.data.subscribeToCopyFileContent;
+        const {fileName, fileContent, totalParts, partNo} = event.value.data.subscribeToCopyFileContent;
         this.setState((prev) => {
-            let fileLink = "<iframe src='" + fileContent + "' frameborder=\"0\" style=\"border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;\" allowfullscreen>" + "" + "</iframe>";
-            let newState = {'receivedFiles' : prev.receivedFiles.concat([fileLink])};
-            setTimeout(() => {
-                let popup = window.open();
-                if (!popup) {
-                    this.setState({
-                        popupMessage: {
+            const newState = {
+                receivedFiles: new Map(prev.receivedFiles.entries())
+            };
+
+            let fileParts;
+            if (newState.receivedFiles.has(fileName)) {
+                fileParts = newState.receivedFiles.get(fileName);
+            } else {
+                fileParts = new Array(totalParts);
+                newState.receivedFiles.set(fileName, fileParts);
+            }
+
+            fileParts[partNo] = fileContent;
+
+            if (!fileParts.includes(undefined)) {
+                console.debug(fileName, 'all parts collected');
+                const wholeFileContent = fileParts.join('');
+                console.debug('Whole file content', wholeFileContent);
+                let fileLink = "<iframe src='" + wholeFileContent  + "' frameborder=\"0\" style=\"border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;\" allowfullscreen>" + "Try another browser" + "</iframe>";
+                setTimeout(() => {
+                    let popup = window.open();
+                    if (!popup) {
+                        newState.popupMessage = {
                             severity: 'error',
                             message: 'Allow pop-ups in your browser'
                         }
-                    })
-                } else {
-                    popup.document.write(fileLink);
-                }
-            });
+                    } else {
+                        popup.document.title = fileName;
+                        popup.document.write(fileLink);
+
+                    }
+                }, 1000);
+                fileParts.fill(undefined);
+            }
 
             return newState;
         })

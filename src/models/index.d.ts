@@ -15,6 +15,8 @@ export declare class CopyFileContent {
   readonly fileName: string;
   readonly id: string;
   readonly secret: string;
+  readonly totalParts: number;
+  readonly partNo: number;
   constructor(init: ModelInit<CopyFileContent>);
 }
 
@@ -26,7 +28,7 @@ export declare class WebPushSubscription {
   readonly id: string;
   readonly subscription: string;
   readonly secret: string;
-  readonly _ttl: number;
+  readonly expire: number;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
   constructor(init: ModelInit<WebPushSubscription, WebPushSubscriptionMetaData>);

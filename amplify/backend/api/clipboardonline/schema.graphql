@@ -6,7 +6,7 @@ type WebPushSubscription @model @auth(rules: [{ allow: public, provider: apiKey 
   id: ID!
   subscription: String! @index(name: "subscriptionOnTextContent-index", queryField: "subscriptionOnTextContent")
   secret: String!
-  _ttl: AWSTimestamp!
+  expire: AWSTimestamp!
 }
 
 
@@ -21,7 +21,9 @@ type CopyFileContent {
   fileContent: String!
   fileName: String!
   id: ID!
-  secret: String!
+  secret: String!,
+  totalParts: Int!,
+  partNo: Int!
 }
 
 schema {
@@ -36,7 +38,7 @@ type Query {
 
 type Mutation {
   sendCopyPasteTextContent(secret: String!, data: String!): CopyPasteTextContent @function(name: "CopyPasteTextContentDatasourceAdapter-${env}")
-  sendCopyFileContent(fileContent: String!, fileName: String!, secret: String!): CopyFileContent @function(name: "CopyPasteTextContentDatasourceAdapter-${env}")
+  sendCopyFileContent(fileContent: String!, fileName: String!, secret: String!, totalParts: Int!, partNo: Int!): CopyFileContent @function(name: "CopyPasteTextContentDatasourceAdapter-${env}")
 }
 
 type Subscription {

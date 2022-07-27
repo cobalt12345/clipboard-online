@@ -25,6 +25,14 @@
     {
       "cloudFormationParameterName": "reactAppVapidPrivateKey",
       "environmentVariableName": "REACT_APP_VAPID_PRIVATE_KEY"
+    },
+    {
+      "cloudFormationParameterName": "reactAppRegion",
+      "environmentVariableName": "REACT_APP_REGION"
+    },
+    {
+      "cloudFormationParameterName": "reactAppTableName",
+      "environmentVariableName": "REACT_APP_TABLE_NAME"
     }
   ]
 }

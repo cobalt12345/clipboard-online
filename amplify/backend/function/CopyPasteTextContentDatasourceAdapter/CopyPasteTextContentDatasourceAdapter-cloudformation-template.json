@@ -39,6 +39,12 @@
     },
     "reactAppVapidPrivateKey": {
       "Type": "String"
+    },
+    "reactAppRegion": {
+      "Type": "String"
+    },
+    "reactAppTableName": {
+      "Type": "String"
     }
   },
   "Conditions": {
@@ -114,6 +120,12 @@
             },
             "REACT_APP_VAPID_PRIVATE_KEY": {
               "Ref": "reactAppVapidPrivateKey"
+            },
+            "REACT_APP_REGION": {
+              "Ref": "reactAppRegion"
+            },
+            "REACT_APP_TABLE_NAME": {
+              "Ref": "reactAppTableName"
             }
           }
         },

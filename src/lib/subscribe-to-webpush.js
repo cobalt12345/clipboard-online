@@ -23,12 +23,11 @@ export default async function subscribe(secret, apiClient: ApiClient, isAppleDev
         console.debug('Web push subscribe. Secret: %s', secret);
         let swReg = await navigator.serviceWorker.register("/sw.js");
         let subscription = await swReg.pushManager.getSubscription();
-        console.debug('Already subscribed to Web Push', JSON.stringify(subscription));
+        console.debug('Subscribed to Web Push', JSON.stringify(subscription));
         if (!subscription) {
             subscription = await swReg.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: urlB64ToUint8Array(config.pushKey),
-                secret: secret
+                applicationServerKey: urlB64ToUint8Array(config.pushKey)
             });
 
         }

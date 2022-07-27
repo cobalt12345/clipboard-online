@@ -22,19 +22,23 @@ webpush.setVapidDetails(
  * @type {import('@types/aws-lambda').APIGatewayProxyHandler}
  */
 exports.handler = async (event, context, callback) => {
-    console.debug(`EVENT: ${JSON.stringify(event)}`);
+    // console.debug(`EVENT: ${JSON.stringify(event)}`);
     switch (event?.fieldName) {
         case 'sendCopyFileContent':
             await callbackOnSaveFileContent(event, callback);
+
+            break;
         case 'sendCopyPasteTextContent':
             await callbackOnSaveTextContent(event, callback);
+
+            break;
     }
 
     let promises = [];
 
     try {
         let subscriptions = await getSubscriptions(event.arguments.secret);
-        console.debug("Subscriptions: ", subscriptions);
+        // console.debug("Subscriptions: ", subscriptions);
         subscriptions.forEach((subscription) => {
             let result = webpush.sendNotification(subscription,
                 JSON.stringify({body: 'Content received via Online clipboard', title: 'Online clipboard'}));
@@ -55,9 +59,7 @@ async function callbackOnSaveTextContent(event, callback) {
         id: uuidv4(),
         secret: event.arguments.secret,
         body: event.arguments.data,
-        publishedAt: dateTimeISO,
-        createdAt: dateTimeISO,
-        updatedAt: dateTimeISO
+        publishedAt: dateTimeISO
     }
 
     callback(null, copyPasteTextContent);
@@ -69,16 +71,18 @@ async function callbackOnSaveFileContent(event, callback) {
         id: uuidv4(),
         secret: event.arguments.secret,
         fileName: event.arguments.fileName,
-        fileContent: event.arguments.fileContent
+        fileContent: event.arguments.fileContent,
+        totalParts: event.arguments.totalParts,
+        partNo: event.arguments.partNo
     }
 
     callback(null, copyFileContent);
 }
 
 async function getSubscriptions(secret) {
-    const client = new DynamoDBClient({region: 'eu-central-1'});
+    const client = new DynamoDBClient({region: process.env.REACT_APP_REGION});
     const command = new ScanCommand({
-        TableName: 'WebPushSubscription-ffffbplvdzfvlhn7quzs6b635q-dev',
+        TableName: process.env.REACT_APP_TABLE_NAME,
         FilterExpression: 'secret = :secret',
         ExpressionAttributeValues: {":secret":{"S":secret}}
     });
@@ -86,11 +90,11 @@ async function getSubscriptions(secret) {
     // console.debug('Command: ', JSON.stringify(command));
     try {
         const response = await client.send(command);
-        console.debug(JSON.stringify(response));
+        // console.debug(JSON.stringify(response));
 
         return response['Items'].map((item, index, array) => {
             const subscriptionObj = JSON.parse(item.subscription['S']);
-            console.debug("Subscription: ", subscriptionObj);
+            // console.debug("Subscription: ", subscriptionObj);
 
             return subscriptionObj;
         });
