@@ -2,12 +2,6 @@ import ApiClient from "./ApiClient";
 
 const config = { pushKey: process.env.REACT_APP_VAPID_PUBLIC_KEY};
 
-export async function requestNotificationPermission () {
-    const permission = await window.Notification.requestPermission();
-    if (permission !== 'granted') {
-        throw new Error('Permission not granted for Notification');
-    }
-}
 
 /**
  * This function causes issues on Apple devices. It sends Web Push notifications - works in Google Chrome only.

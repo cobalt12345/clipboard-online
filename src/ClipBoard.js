@@ -8,16 +8,21 @@ import ProTip from "./ProTip";
 import FileUpload from "./FileUpload";
 import isAppleDevice from "./lib/utils";
 import {QRCodeSVG} from 'qrcode.react';
+import HelpDialog from "./HelpDialog";
+import CircularProgress, {
+    CircularProgressProps,
+} from '@mui/material/CircularProgress';
 
 class ClipBoard extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
+            progress: 0,
             input: '',
             output: '',
             secret: '',
-            subscribedObPush: false,
+            subscribedOnPush: false,
             popupMessage: null,
             receivedFiles: new Map(),
             roomLink: window.location.href
@@ -63,9 +68,8 @@ class ClipBoard extends React.Component {
     subscribeOnPush() {
         if (this.state.secret) {
             console.debug('Subscribe on push notifications');
-            this.textContentSubscription?.unsubscribe();
-            this.fileSubcription?.unsubscribe();
-            this.textContentSubscription = this.apiClient.awaitTextContent(this.state.secret, this.receivedTextContent,
+
+            let textContentSubscription = this.apiClient.awaitTextContent(this.state.secret, this.receivedTextContent,
                 (error)=>{
                     this.setState({
                         popupMessage: {
@@ -74,7 +78,7 @@ class ClipBoard extends React.Component {
                         }
                     })
                 });
-            this.fileSubcription = this.apiClient.awaitFileContent(this.state.secret, this.receivedFile,
+            let fileSubscription = this.apiClient.awaitFileContent(this.state.secret, this.receivedFile,
                 (error)=>{
                     this.setState({
                         popupMessage: {
@@ -88,7 +92,13 @@ class ClipBoard extends React.Component {
                 .then((value) => {
                         console.debug('Subscribed to web push notifications', value);
                         this.setState((prevState, prevProps) => {
+                            prevState.fileSubscription?.unsubscribe();
+                            prevState.textContentSubscription?.unsubscribe();
+
                                 return {
+                                    ...prevState,
+                                    fileSubscription,
+                                    textContentSubscription,
                                     receivedFiles: new Map(),
                                     subscribedOnPush: true,
                                     popupMessage: {
@@ -108,8 +118,6 @@ class ClipBoard extends React.Component {
         }
     }
 
-
-
     sendTextContent() {
         const savedTextContent : CopyPasteTextContent = this.apiClient.saveTextContent(this.state.secret,
             this.state.input);
@@ -127,10 +135,31 @@ class ClipBoard extends React.Component {
     receivedFile(event) {
         console.debug('Received file', event)
         const {fileName, fileContent, totalParts, partNo} = event.value.data.subscribeToCopyFileContent;
+
+        function calcProgress(receivedFiles) {
+            let filePartsSum = 0;
+            let filePartsReceived = 0;
+            for (let fileParts of receivedFiles.values()) {
+                filePartsSum += fileParts.length;
+                fileParts.forEach((element, index, allElements) => {
+                    if (element) {
+                        ++filePartsReceived;
+                    }
+                });
+            }
+            console.debug('All parts', filePartsSum); //10 - 100
+            console.debug('Received parts', filePartsReceived); //4 - X
+            console.debug('Progress', filePartsSum / filePartsReceived);
+
+            return (filePartsReceived * 100) / filePartsSum;
+        }
+
         this.setState((prev) => {
-            const newState = {
-                receivedFiles: new Map(prev.receivedFiles.entries())
-            };
+            const newState = Object.assign({}, prev);
+            newState.receivedFiles = new Map();
+            for (let entry of prev.receivedFiles.entries()) {
+                newState.receivedFiles.set(entry[0], entry[1].slice());
+            }
 
             let fileParts;
             if (newState.receivedFiles.has(fileName)) {
@@ -139,8 +168,8 @@ class ClipBoard extends React.Component {
                 fileParts = new Array(totalParts);
                 newState.receivedFiles.set(fileName, fileParts);
             }
-
             fileParts[partNo] = fileContent;
+            newState.progress = calcProgress(newState.receivedFiles);
 
             if (!fileParts.includes(undefined)) {
                 console.debug(fileName, 'all parts collected');
@@ -173,7 +202,9 @@ class ClipBoard extends React.Component {
                 <AppBar position="sticky">
                     <Toolbar variant="regular">
                         <Typography variant="h6" color="inherit" component="div">
+
                         </Typography>
+                        <HelpDialog />
                         <ProTip />
 
                     </Toolbar>
@@ -245,7 +276,8 @@ class ClipBoard extends React.Component {
                                 rows={5}
                                 fullWidth
                                 disabled
-                                onClick={(event) => {this.copyToClipboard(event.target.value)}}
+                                onClick={(event) => {this.copyToClipboard(
+                                    event.target.value || event.target.textContent)}}
                                 value={this.state.output}
                                 variant="filled"
                             /> : null}
@@ -255,10 +287,36 @@ class ClipBoard extends React.Component {
                             <Button onClick={this.sendTextContent} variant="contained" disabled={!this.state.input}>Add</Button> : null
                         }
                     </Grid>
+                    <Grid xs={4} sm={8} md={12} alignItems="center" textAlign="center" paddingTop={3}>
+                        {this.state.subscribedOnPush ?
+                            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                                <CircularProgress variant="determinate" value = {this.state.progress}/>
+                                <Box
+                                    sx={{
+                                        top: 0,
+                                        left: 0,
+                                        bottom: 0,
+                                        right: 0,
+                                        position: 'absolute',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <Typography
+                                        variant="caption"
+                                        component="div"
+                                        color="text.secondary"
+                                    >{`${Math.round(this.state.progress)}%`}</Typography>
+                                </Box>
+                            </Box> : null}
+                    </Grid>
                     <Grid item xs={4} sm={8} md={12} alignItems="center" textAlign="center">
                         {this.state.subscribedOnPush ?
-                            <FileUpload secret={() => this.state.secret} client={this.apiClient}/> : null
-                        }
+                            <FileUpload secret={() => this.state.secret} client={this.apiClient}
+                                        resetProgressCallback={() => {
+                                this.setState({progress: 0})
+                            }}/> : null}
                     </Grid>
                 </Grid>
             </Paper>

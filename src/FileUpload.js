@@ -72,7 +72,7 @@ class FileUpload extends React.Component {
 
             Promise.all(filePromises)
                 .then(() => {
-                    // if each file processed successfuly then set our state to true
+                    // if each file processed successfully then set our state to true
                     this.setState({isFilesReady: true})
                 })
                 .catch((error) => {
@@ -81,10 +81,13 @@ class FileUpload extends React.Component {
                 })
         })
 
-        let resetForm = () => this.setState(
-            {uploadedFilesReadyForSubmit: [], popupMessage: null});
+        let resetForm = () => {
+            this.props.resetProgressCallback();
+            this.setState({uploadedFilesReadyForSubmit: [], popupMessage: null})
+        };
 
         let handleForm = async (event) => {
+            this.props.resetProgressCallback();
             event.preventDefault();
             if (!this.state.isFilesReady) {
                 alert('files still getting processed')
@@ -116,7 +119,7 @@ class FileUpload extends React.Component {
                         <ol>
                             {files}
                         </ol>
-                        <input type="file" id="fileInput" name="file" ref={this.fileInputRef} multiple />
+                        <input type="file" id="fileInput" name="file" ref={this.fileInputRef} multiple={false} />
                         <button type="submit">Submit</button>
                         <button type="reset">Reset</button>
                     </form>
