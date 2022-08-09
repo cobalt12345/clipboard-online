@@ -18,7 +18,6 @@ class ClipBoard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            progress: 0,
             input: '',
             output: '',
             secret: '',
@@ -33,7 +32,6 @@ class ClipBoard extends React.Component {
         this.subscribeOnPush = this.subscribeOnPush.bind(this)
         this.sendTextContent = this.sendTextContent.bind(this)
         this.receivedTextContent = this.receivedTextContent.bind(this)
-        this.receivedFile = this.receivedFile.bind(this)
         this.copyToClipboard = this.copyToClipboard.bind(this)
         this.componentDidMount = this.componentDidMount.bind(this)
         this.componentWillUnmount = this.componentWillUnmount.bind(this)
@@ -78,26 +76,15 @@ class ClipBoard extends React.Component {
                         }
                     })
                 });
-            let fileSubscription = this.apiClient.awaitFileContent(this.state.secret, this.receivedFile,
-                (error)=>{
-                    this.setState({
-                        popupMessage: {
-                            severity: "error",
-                            message: error
-                        }
-                    })
-                });
 
             subscribe(this.state.secret, this.apiClient, isAppleDevice())
                 .then((value) => {
                         console.debug('Subscribed to web push notifications', value);
                         this.setState((prevState, prevProps) => {
-                            prevState.fileSubscription?.unsubscribe();
                             prevState.textContentSubscription?.unsubscribe();
 
                                 return {
                                     ...prevState,
-                                    fileSubscription,
                                     textContentSubscription,
                                     receivedFiles: new Map(),
                                     subscribedOnPush: true,
@@ -130,70 +117,6 @@ class ClipBoard extends React.Component {
         console.debug('Received text content', event);
         const textContent = event.value.data.subscribeToCopyPasteTextContent.body;
         this.setState({output: textContent});
-    }
-
-    receivedFile(event) {
-        console.debug('Received file', event)
-        const {fileName, fileContent, totalParts, partNo} = event.value.data.subscribeToCopyFileContent;
-
-        function calcProgress(receivedFiles) {
-            let filePartsSum = 0;
-            let filePartsReceived = 0;
-            for (let fileParts of receivedFiles.values()) {
-                filePartsSum += fileParts.length;
-                fileParts.forEach((element, index, allElements) => {
-                    if (element) {
-                        ++filePartsReceived;
-                    }
-                });
-            }
-            console.debug('All parts', filePartsSum); //10 - 100
-            console.debug('Received parts', filePartsReceived); //4 - X
-            console.debug('Progress', filePartsSum / filePartsReceived);
-
-            return (filePartsReceived * 100) / filePartsSum;
-        }
-
-        this.setState((prev) => {
-            const newState = Object.assign({}, prev);
-            newState.receivedFiles = new Map();
-            for (let entry of prev.receivedFiles.entries()) {
-                newState.receivedFiles.set(entry[0], entry[1].slice());
-            }
-
-            let fileParts;
-            if (newState.receivedFiles.has(fileName)) {
-                fileParts = newState.receivedFiles.get(fileName);
-            } else {
-                fileParts = new Array(totalParts);
-                newState.receivedFiles.set(fileName, fileParts);
-            }
-            fileParts[partNo] = fileContent;
-            newState.progress = calcProgress(newState.receivedFiles);
-
-            if (!fileParts.includes(undefined)) {
-                console.debug(fileName, 'all parts collected');
-                const wholeFileContent = fileParts.join('');
-                console.debug('Whole file content', wholeFileContent);
-                let fileLink = "<iframe src='" + wholeFileContent  + "' frameborder=\"0\" style=\"border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;\" allowfullscreen>" + "Try another browser" + "</iframe>";
-                setTimeout(() => {
-                    let popup = window.open();
-                    if (!popup) {
-                        newState.popupMessage = {
-                            severity: 'error',
-                            message: 'Allow pop-ups in your browser'
-                        }
-                    } else {
-                        popup.document.title = fileName;
-                        popup.document.write(fileLink);
-
-                    }
-                }, 1000);
-                fileParts.fill(undefined);
-            }
-
-            return newState;
-        })
     }
 
     render() {
@@ -287,36 +210,10 @@ class ClipBoard extends React.Component {
                             <Button onClick={this.sendTextContent} variant="contained" disabled={!this.state.input}>Add</Button> : null
                         }
                     </Grid>
-                    <Grid xs={4} sm={8} md={12} alignItems="center" textAlign="center" paddingTop={3}>
-                        {this.state.subscribedOnPush ?
-                            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                                <CircularProgress variant="determinate" value = {this.state.progress}/>
-                                <Box
-                                    sx={{
-                                        top: 0,
-                                        left: 0,
-                                        bottom: 0,
-                                        right: 0,
-                                        position: 'absolute',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                    }}
-                                >
-                                    <Typography
-                                        variant="caption"
-                                        component="div"
-                                        color="text.secondary"
-                                    >{`${Math.round(this.state.progress)}%`}</Typography>
-                                </Box>
-                            </Box> : null}
-                    </Grid>
                     <Grid item xs={4} sm={8} md={12} alignItems="center" textAlign="center">
                         {this.state.subscribedOnPush ?
-                            <FileUpload secret={() => this.state.secret} client={this.apiClient}
-                                        resetProgressCallback={() => {
-                                this.setState({progress: 0})
-                            }}/> : null}
+                            <FileUpload secret={this.state.secret}
+                                        client={this.apiClient}/> : null}
                     </Grid>
                 </Grid>
             </Paper>
