@@ -23,9 +23,12 @@ export default async function subscribe(secret, apiClient: ApiClient, isAppleDev
                 userVisibleOnly: true,
                 applicationServerKey: urlB64ToUint8Array(config.pushKey)
             });
-
+            // apiClient.storeWebPushSubscription(JSON.stringify(subscription), secret);
         }
         apiClient.storeWebPushSubscription(JSON.stringify(subscription), secret);
+
+        return subscription;
+
     } else {
         console.warn('Web Push notifications are not supported for Ios');
     }

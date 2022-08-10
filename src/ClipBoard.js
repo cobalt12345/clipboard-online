@@ -78,14 +78,15 @@ class ClipBoard extends React.Component {
                 });
 
             subscribe(this.state.secret, this.apiClient, isAppleDevice())
-                .then((value) => {
-                        console.debug('Subscribed to web push notifications', value);
-                        this.setState((prevState, prevProps) => {
+                .then((webPushSubscription) => {
+                        console.debug('Subscribed to web push notifications', webPushSubscription);
+                        this.setState((prevState) => {
                             prevState.textContentSubscription?.unsubscribe();
-
+                            prevState.webPushSubscription?.unsubscribe();
                                 return {
                                     ...prevState,
                                     textContentSubscription,
+                                    webPushSubscription,
                                     receivedFiles: new Map(),
                                     subscribedOnPush: true,
                                     popupMessage: {

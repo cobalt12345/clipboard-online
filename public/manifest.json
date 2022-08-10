@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Online clipboard",
+  "name": "Online clipboard - secure tool to copy text data and files between clients (browsers)",
   "icons": [
     {
       "src": "favicon.ico",
